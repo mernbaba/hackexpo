@@ -7,6 +7,7 @@ import EventDetails from './components/EventDetails';
 import About from './components/About';
 import Organizers from './components/Organizers';
 import Advisory from './components/Advisory';
+import ReviewBoard from './components/ReviewBoard';
 import Speakers from './components/Speakers';
 import Partners from './components/Partners';
 import Tickets from './components/Tickets';
@@ -44,6 +45,8 @@ function App() {
           <Organizers />
 
           <Advisory />
+
+          <ReviewBoard />
 
           <Speakers />
 

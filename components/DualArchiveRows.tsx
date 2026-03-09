@@ -7,7 +7,7 @@ interface ArchiveCardProps {
     item: typeof MEMORIES[0];
 }
 
-const ArchiveCard: React.FC<ArchiveCardProps> = ({ item }) => {
+const ArchiveCard: React.FC<ArchiveCardProps & { onClick: () => void }> = ({ item, onClick }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -27,9 +27,10 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ item }) => {
 
     return (
         <div
-            className="w-[320px] h-[220px] p-2"
+            className="w-[320px] h-[220px] p-2 cursor-pointer"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={onClick}
         >
             <PopOutCard className="h-full" depth={30}>
                 <div className={`
@@ -61,7 +62,7 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ item }) => {
                     {/* Info */}
                     <div className="absolute inset-0 z-10 p-4 flex flex-col justify-end">
                         <div className="flex items-center gap-2 mb-1">
-                            {item.type === 'video' ? <Film size={12} className="text-retro-cyan" /> : <Play size={12} className="text-retro-cyan" />}
+                            {item.type === 'video' && <Film size={12} className="text-retro-cyan" />}
                             <span className="text-[10px] font-mono text-retro-cyan tracking-widest uppercase">
                                 {item.type === 'image' ? 'IMG_ARCHIVE' : 'VID_ARCHIVE'}
                             </span>
@@ -82,11 +83,13 @@ const ArchiveCard: React.FC<ArchiveCardProps> = ({ item }) => {
 const ArchiveRow = ({
     items,
     direction = 'left',
-    speedMultiplier = 1
+    speedMultiplier = 1,
+    onItemClick
 }: {
     items: typeof MEMORIES,
     direction?: 'left' | 'right',
-    speedMultiplier?: number
+    speedMultiplier?: number,
+    onItemClick: (item: typeof MEMORIES[0]) => void
 }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const scrollPosRef = useRef(0);
@@ -190,7 +193,7 @@ const ArchiveRow = ({
             >
                 {duplicatedItems.map((item, idx) => (
                     <div key={`${item.id}-${idx}`} className="flex-none snap-center">
-                        <ArchiveCard item={item} />
+                        <ArchiveCard item={item} onClick={() => onItemClick(item)} />
                     </div>
                 ))}
             </div>
@@ -209,12 +212,22 @@ const ArchiveRow = ({
 
 const DualArchiveRows: React.FC = () => {
     const [isMobile, setIsMobile] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<typeof MEMORIES[0] | null>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
         window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setSelectedItem(null);
+        };
+        window.addEventListener('keydown', handleEsc);
+
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+            window.removeEventListener('keydown', handleEsc);
+        };
     }, []);
 
     const topItems = useMemo(() => isMobile ? MEMORIES : MEMORIES.filter((_, i) => i % 2 === 0), [isMobile]);
@@ -223,16 +236,80 @@ const DualArchiveRows: React.FC = () => {
     return (
         <div className={`w-full py-10 ${isMobile ? 'space-y-6' : 'space-y-[60px]'}`}>
             <div className="relative">
-                {!isMobile && (
-                    <div className="absolute -top-6 left-6 text-[10px] font-mono text-retro-text/40 tracking-[0.2em]"></div>
-                )}
-                <ArchiveRow items={topItems} direction="left" />
+                <ArchiveRow items={topItems} direction="left" onItemClick={(item) => setSelectedItem(item)} />
             </div>
 
             {!isMobile && (
                 <div className="relative">
-                    <div className="absolute -top-6 left-6 text-[10px] font-mono text-retro-text/40 tracking-[0.2em]"></div>
-                    <ArchiveRow items={bottomItems} direction="right" />
+                    <ArchiveRow items={bottomItems} direction="right" onItemClick={(item) => setSelectedItem(item)} />
+                </div>
+            )}
+
+            {/* Media Modal */}
+            {selectedItem && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-fade-in"
+                    onClick={() => setSelectedItem(null)}
+                >
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-nothing-black/90 backdrop-blur-xl"></div>
+
+                    {/* Grid Background */}
+                    <div className="absolute inset-0 bg-grid-white/[0.03] pointer-events-none"></div>
+
+                    {/* Content Container */}
+                    <div
+                        className="relative w-full max-w-5xl aspect-video md:aspect-[16/9] bg-nothing-dark border border-retro-cyan/30 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(165,243,252,0.15)] group/modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Media Wrapper */}
+                        <div className="w-full h-full relative">
+                            {selectedItem.type === 'video' ? (
+                                <video
+                                    src={selectedItem.src}
+                                    className="w-full h-full object-contain"
+                                    controls
+                                    autoPlay
+                                />
+                            ) : (
+                                <img
+                                    src={selectedItem.src}
+                                    alt={selectedItem.title}
+                                    className="w-full h-full object-contain"
+                                />
+                            )}
+
+                            {/* Overlay Effects */}
+                            <div className="absolute inset-0 bg-scanlines opacity-10 pointer-events-none"></div>
+
+                            {/* Header Info */}
+                            <div className="absolute top-0 left-0 w-full p-6 bg-gradient-to-b from-nothing-black/80 to-transparent flex justify-between items-start opacity-0 group-hover/modal:opacity-100 transition-opacity duration-300">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        {selectedItem.type === 'video' ? <Film size={14} className="text-retro-cyan" /> : null}
+                                        <span className="text-[10px] font-mono text-retro-cyan tracking-[0.3em] uppercase">
+                                            {selectedItem.type === 'image' ? 'IMAGE_ASSET' : 'VIDEO_FEED'}
+                                        </span>
+                                    </div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-white font-mono">{selectedItem.title}</h2>
+                                    <p className="text-xs text-retro-text/60 font-mono italic">{selectedItem.desc}</p>
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedItem(null)}
+                                    className="p-2 rounded-lg bg-retro-cyan/10 border border-retro-cyan/20 text-retro-cyan hover:bg-retro-cyan hover:text-nothing-black transition-all group/close"
+                                >
+                                    <div className="w-6 h-6 flex items-center justify-center font-mono font-bold text-lg leading-none group-hover/close:rotate-90 transition-transform">×</div>
+                                </button>
+                            </div>
+
+                            {/* Corner Accents */}
+                            <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-retro-cyan opacity-40"></div>
+                            <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-retro-cyan opacity-40"></div>
+                            <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-retro-cyan opacity-40"></div>
+                            <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-retro-cyan opacity-40"></div>
+                        </div>
+                    </div>
                 </div>
             )}
 

@@ -2,10 +2,10 @@
 import { Linkedin, Github, Globe, Instagram, Mail, Shield, Award, Zap, Hexagon, Layers, Radio, Users, Twitter, X } from 'lucide-react';
 
 export const EVENT_DETAILS = {
-  date: "May 1st & 2nd",
+  date: "April 24th & 25th",
   venue: "Science City",
   location: "Kolkata",
-  status: "CFP Submission Open"
+  status: "CFP Release – 9 March (10:30–11:00 AM), submission deadline 1st April"
 };
 
 export const CYBER_SOCIETY_LINKS = [
@@ -67,8 +67,8 @@ export const CRAC_LINKS = [
     color: "hover:text-pink-500"
   },
   {
-    name: "admin@crac-learning.com",
-    url: "mailto:admin@crac-learning.com",
+    name: "support@crac-learning.com",
+    url: "mailto:support@crac-learning.com",
     icon: Mail,
     color: "hover:text-green-400"
   }
@@ -132,6 +132,33 @@ export const ADVISORY = [
     role: "Senior Consultant @ Central University | NIOS | (OsD) NitK",
     company: "",
     image: "https://i.postimg.cc/43hmhbFR/Whats-App-Image-2026-03-03-at-15-02-18.jpg"
+  }
+];
+
+export const REVIEW_BOARD = [
+  {
+    id: 1,
+    name: "Kevin Cardwell",
+    role: "President at Cyber2Labs",
+    company: "Cyber2Labs",
+    image: "https://i.postimg.cc/TPJ9QbSc/1534387282319.jpg",
+    linkedin: "https://www.linkedin.com/in/kevin-cardwell-6102891/"
+  },
+  {
+    id: 2,
+    name: "Raja Paul",
+    role: "OSCP || Manager at EY GDS",
+    company: "EY GDS",
+    image: "https://i.postimg.cc/G35jMdMJ/1516605495045.jpg",
+    linkedin: "https://www.linkedin.com/in/raja-paul-8366a416/"
+  },
+  {
+    id: 3,
+    name: "Swati L",
+    role: "CEO & Founder @ DefHawk | Ex Amazon, Microsoft",
+    company: "CRAC LEARNING, DefHawk",
+    image: "https://i.postimg.cc/YChhqLQk/image.png",
+    linkedin: "https://www.linkedin.com/in/swatil/"
   }
 ];
 
@@ -383,6 +410,7 @@ export const TEAM = [
 export const NAV_ITEMS = [
   { label: "Home", href: "#home" },
   { label: "Advisory", href: "#advisory" },
+  { label: "Review Board", href: "#review-board" },
   { label: "Speakers", href: "#speakers" },
   { label: "CFP", href: "#cfp" },
   { label: "Team", href: "#team" },
